@@ -1,15 +1,12 @@
-import './App.css'
-import { Header } from './components/Header'
-import { PlayerCardGrid } from './components/PlayerCardGrid'
-import { HeartRateChart } from './components/HeartRateChart'
+import { Header } from '@/components/Header'
+import { Dashboard } from '@/components/Dashboard'
 
 function App() {
   return (
-    <>
+    <div className="min-h-screen">
       <Header />
-      <PlayerCardGrid />
-      <HeartRateChart />
-    </>
+      <Dashboard />
+    </div>
   )
 }
 

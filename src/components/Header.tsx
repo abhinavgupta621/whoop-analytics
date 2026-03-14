@@ -1,47 +1,77 @@
-import { usePlayerStore, MAX_PLAYERS } from '../store/usePlayerStore';
-import { isBLESupported } from '../services/heartRateService';
-import styles from './Header.module.css';
+import { useDeviceStore } from '@/store/useDeviceStore';
+import { useThemeStore } from '@/store/useThemeStore';
+import { isBLESupported } from '@/services/heartRateService';
+import { Button } from '@/components/ui/button';
 
 export function Header() {
-  const playerCount = usePlayerStore((s) => s.players.length);
-  const addPlayer = usePlayerStore((s) => s.addPlayer);
+  const connected = useDeviceStore((s) => s.connected);
+  const connecting = useDeviceStore((s) => s.connecting);
+  const connect = useDeviceStore((s) => s.connect);
+  const disconnect = useDeviceStore((s) => s.disconnect);
   const bleSupported = isBLESupported();
+  const theme = useThemeStore((s) => s.theme);
+  const toggleTheme = useThemeStore((s) => s.toggle);
 
   return (
-    <header className={styles.header}>
-      <div className={styles.brand}>
-        <span className={styles.logo}>&#9829;</span>
-        <h1 className={styles.title}>dontsweat</h1>
+    <header className="sticky top-0 z-50 flex items-center justify-between px-6 py-3 bg-background/85 backdrop-blur-xl border-b">
+      <div className="flex items-center gap-3">
+        <span
+          className="text-2xl text-destructive drop-shadow-[0_0_8px_var(--destructive)]"
+          style={{ animation: 'pulse-heart 1.2s ease-in-out infinite' }}
+        >
+          &#9829;
+        </span>
+        <div className="flex flex-col">
+          <h1 className="text-lg font-bold tracking-wide leading-tight">
+            Whoop Analytics
+          </h1>
+          <span className="text-[10px] text-muted-foreground tracking-widest uppercase">
+            Real-time biometrics
+          </span>
+        </div>
       </div>
 
-      <div className={styles.actions}>
-        <a
-          href="https://github.com/arshka/dontsweat"
-          target="_blank"
-          rel="noopener noreferrer"
-          className={styles.starLink}
-          title="Star on GitHub"
+      <div className="flex items-center gap-2">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8"
+          onClick={toggleTheme}
+          title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
         >
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-            <path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.75.75 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25z" />
-          </svg>
-          Star
-        </a>
-        <span className={styles.count}>
-          {playerCount}/{MAX_PLAYERS}
-        </span>
+          {theme === 'dark' ? (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="4" />
+              <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+            </svg>
+          ) : (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+            </svg>
+          )}
+        </Button>
         {!bleSupported ? (
-          <span className={styles.warning}>
+          <span className="text-destructive text-sm">
             Web Bluetooth not supported — use Chrome or Edge
           </span>
-        ) : (
-          <button
-            className={styles.addButton}
-            onClick={addPlayer}
-            disabled={playerCount >= MAX_PLAYERS}
+        ) : connected ? (
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-xs text-muted-foreground hover:text-destructive hover:border-destructive"
+            onClick={disconnect}
           >
-            + Add Device
-          </button>
+            Disconnect
+          </Button>
+        ) : (
+          <Button
+            variant="default"
+            size="sm"
+            onClick={connect}
+            disabled={connecting}
+          >
+            {connecting ? 'Connecting\u2026' : 'Connect Device'}
+          </Button>
         )}
       </div>
     </header>
